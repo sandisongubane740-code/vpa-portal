@@ -2,7 +2,7 @@
 // VECTOR POINT ACADEMY — v3 FRONTEND ENGINE (SINGLE-PAGE PORTAL)
 // Paste your v3 Part 1 Google Apps Script /exec Web App URL on Line 5:
 // =====================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbwBmcwIrodzrDDjgcoe0ggU8ggFpQi04o2xMjmaWi6z99EcXNzxcKWMrbyHxokbE5YElA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbybIcMlnJmjVViKnFaVx7NyQKZJR5klaOp6toEmoV8oHje_jRDVqhHQ1HPDxyznTKNyJA/exec";
 
 let currentUser = null;
 let appData = {};
@@ -210,21 +210,40 @@ function renderTimetable() {
 
 
 async function logCheckIn(sessionCode, groupCode, tutorId, topic) {
+  if (!sessionCode || String(sessionCode).toLowerCase().startsWith("scheduled:")) {
+    showToast("Check-in is only available on the scheduled day of the class.");
+    return;
+  }
+
+  const pin = window.prompt(
+    "Live Class Verification:\nEnter the 3-digit Session PIN announced by your tutor in class:"
+  );
+  if (pin === null) return;
+
+  const cleanPin = pin.trim();
+  if (!/^\d{3}$/.test(cleanPin)) {
+    showToast("Invalid PIN: Please enter the exact 3-digit number from your tutor.");
+    return;
+  }
+
   try {
-    await callApi("checkIn", {
+    showToast("Verifying class enrollment & PIN...");
+    const res = await callApi("checkIn", {
       studentId: currentUser.id,
       studentName: currentUser.name,
       sessionCode,
       groupCode,
       tutorId,
-      topic
+      topic,
+      pin: cleanPin
     });
-    showToast("Attendance check-in logged to Session_Attendance!");
+    showToast(res.message || "Attendance verified and logged!");
     await loadDashboard();
   } catch (err) {
-    showToast(err.message);
+    showToast(err.message || "Check-in failed.");
   }
 }
+
 
 function renderMarks() {
   const tbody = document.getElementById("marksTableBody");
