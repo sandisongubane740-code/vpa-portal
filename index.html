@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vector Point Academy | Academic & Executive Portal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- IN-PORTAL STUDY MATERIAL VIEWER MODAL (NO EXTRA TABS) -->
+  <div id="previewModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="previewTitle">Study Material Preview</h3>
+        <div class="modal-actions">
+          <a id="previewExternalBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary btn-sm">Open in Drive</a>
+          <button id="closePreviewBtn" type="button" class="btn-danger btn-sm">Close Preview</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <iframe id="previewFrame" src="" title="Study Material Viewer" frameborder="0"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- LOGIN SCREEN -->
+  <section id="loginScreen" class="login-wrapper">
+    <div class="login-card">
+      <div class="brand-badge">VECTOR POINT ACADEMY</div>
+      <h1>Academic &amp; Executive Portal</h1>
+      <p class="subtitle">Sign in with your VPA ID (Student, Tutor, or Admin) and 4-digit Portal PIN.</p>
+
+      <form id="loginForm">
+        <label for="loginId">VPA User ID</label>
+        <input type="text" id="loginId" placeholder="e.g. VPA/STU/260001 or VPA/TUT/260001" required />
+
+        <label for="loginPin">4-Digit Portal PIN</label>
+        <input type="password" id="loginPin" maxlength="6" placeholder="••••" required />
+
+        <button type="submit" id="loginBtn" class="btn-primary w-full">Sign In to Portal</button>
+      </form>
+
+      <div id="loginError" class="alert-error hidden"></div>
+      <p class="login-footer">Connected live to Vector Point Academy Masterfile.</p>
+    </div>
+  </section>
+
+  <!-- MAIN SINGLE-PAGE APPLICATION SHELL -->
+  <div id="appShell" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-box">VPA</div>
+        <div>
+          <strong>Vector Point</strong>
+          <small id="sidebarRole">Portal</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-btn active" data-target="tabDashboard">Dashboard &amp; Timetable</button>
+        <button type="button" class="nav-btn" data-target="tabPerformance">Academic Performance</button>
+        <button type="button" class="nav-btn" data-target="tabResources">Study Materials</button>
+        <button type="button" class="nav-btn" data-target="tabFeed">Academy Announcements</button>
+        <button type="button" class="nav-btn" data-target="tabMessages">Direct Messages</button>
+        <button type="button" id="navTutorBtn" class="nav-btn hidden" data-target="tabTutor">Tutor Workspace</button>
+        <button type="button" id="navAdminBtn" class="nav-btn hidden" data-target="tabAdmin">Executive Finance &amp; Admin</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <strong id="sidebarUserName">User</strong>
+          <small id="sidebarUserCohort">Cohort</small>
+        </div>
+        <button type="button" id="syncBtn" class="btn-secondary w-full">Sync Live Data</button>
+        <button type="button" id="logoutBtn" class="btn-danger w-full">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- 1. DASHBOARD & TIMETABLE -->
+      <section id="tabDashboard" class="view-section">
+        <div class="page-header">
+          <div>
+            <h2>Dashboard &amp; Timetable</h2>
+            <p id="welcomeText" class="muted">Welcome back.</p>
+          </div>
+          <span id="accountBadge" class="status-pill status-active">Status: Active</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Scheduled Classes</span>
+            <strong id="kpiSessions" class="kpi-value">0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Average Score</span>
+            <strong id="kpiAvg" class="kpi-value">0%</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Attendance Logs</span>
+            <strong id="kpiAttendance" class="kpi-value">0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Study Files</span>
+            <strong id="kpiResources" class="kpi-value">0</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Live Sessions &amp; Master Timetable</h3>
+            <p class="muted">Weekly recurring schedule and live classroom links (Microsoft Teams / Zoom / Meet).</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Day &amp; Time</th>
+                  <th>Group Code</th>
+                  <th>Grade &amp; Subject</th>
+                  <th>Assigned Tutor</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sessionsTableBody">
+                <tr><td colspan="5" class="muted">Loading timetable...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. ACADEMIC PERFORMANCE -->
+      <section id="tabPerformance" class="view-section hidden">
+        <div class="page-header">
+          <div>
+            <h2>Academic Performance &amp; Assessments</h2>
+            <p class="muted">Live CAPS results from Academic_Progress_Log and upcoming Assigned_Assessments.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Assessment Results</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Student</th>
+                  <th>Subject &amp; Assessment</th>
+                  <th>Score</th>
+                  <th>Percentage</th>
+                  <th>CAPS Level</th>
+                </tr>
+              </thead>
+              <tbody id="marksTableBody">
+                <tr><td colspan="6" class="muted">No assessment marks recorded yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Assigned Assessments</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Due Date</th>
+                  <th>Group Code</th>
+                  <th>Type &amp; Title</th>
+                  <th>Instructions</th>
+                </tr>
+              </thead>
+              <tbody id="assignedTableBody">
+                <tr><td colspan="4" class="muted">No assigned assessments yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. STUDY MATERIALS -->
+      <section id="tabResources" class="view-section hidden">
+        <div class="page-header">
+          <div>
+            <h2>Study Materials &amp; Notes</h2>
+            <p class="muted">Preview notes and past papers right inside the portal without leaving the page.</p>
+          </div>
+        </div>
+        <div id="resourcesGrid" class="cards-grid">
+          <p class="muted">No study materials uploaded yet.</p>
+        </div>
+      </section>
+
+      <!-- 4. ACADEMY ANNOUNCEMENTS -->
+      <section id="tabFeed" class="view-section hidden">
+        <div class="page-header">
+          <div>
+            <h2>Academy Announcements</h2>
+            <p class="muted">Official notices from Vector Point Academy staff and administration.</p>
+          </div>
+        </div>
+        <div id="feedList" class="stack-list">
+          <p class="muted">No announcements posted yet.</p>
+        </div>
+      </section>
+
+      <!-- 5. DIRECT MESSAGES -->
+      <section id="tabMessages" class="view-section hidden">
+        <div class="page-header">
+          <div>
+            <h2>Direct Messages</h2>
+            <p class="muted">Role-filtered messaging with automated email notifications.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Send a Direct Message</h3>
+          <form id="messageForm" class="form-grid">
+            <div>
+              <label for="msgRecipient">Recipient (ID — Full Name)</label>
+              <select id="msgRecipient" required>
+                <option value="">Loading recipients...</option>
+              </select>
+            </div>
+            <div>
+              <label for="msgText">Message</label>
+              <input type="text" id="msgText" placeholder="Type your message here..." required />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Send Message</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="messagesList" class="stack-list">
+          <p class="muted">No direct messages yet.</p>
+        </div>
+      </section>
+
+      <!-- 6. TUTOR WORKSPACE -->
+      <section id="tabTutor" class="view-section hidden">
+        <div class="page-header">
+          <div>
+            <h2>Tutor Workspace</h2>
+            <p class="muted">Claim open cohorts, publish classroom links, upload study files, and record CAPS marks.</p>
+          </div>
+        </div>
+
+        <!-- OPEN COHORTS TO CLAIM -->
+        <div class="card">
+          <h3>Open Cohorts Available to Claim (First-Come, First-Served)</h3>
+          <p class="muted">Claiming a class writes your Staff ID to Cohort_Allocation (Col L) so sheet formulas assign you automatically.</p>
+          <div id="openCohortsList" class="cards-grid">
+            <p class="muted">No open cohorts waiting for a tutor right now.</p>
+          </div>
+        </div>
+
+        <!-- UPDATE MICROSOFT TEAMS / ZOOM / MEET CLASSROOM LINK -->
+        <div class="card">
+          <h3>Set Classroom Meeting Link (Microsoft Teams / Zoom / Meet)</h3>
+          <p class="muted">Saves your link to Master_Timetable &amp; Sessions and emails all enrolled students in that group automatically.</p>
+          <form id="meetingLinkForm" class="form-grid">
+            <div>
+              <label for="linkCohortSelect">Select Your Group Code</label>
+              <select id="linkCohortSelect" required>
+                <option value="">Select group...</option>
+              </select>
+            </div>
+            <div>
+              <label for="meetingUrlInput">Classroom Meeting URL</label>
+              <input type="url" id="meetingUrlInput" placeholder="https://teams.microsoft.com/l/meetup-join/..." required />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Save Link &amp; Notify Students</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PUBLISH STUDY MATERIAL -->
+        <div class="card">
+          <h3>Publish Study Material (Google Drive Link)</h3>
+          <form id="studyMaterialForm" class="form-grid">
+            <div>
+              <label for="matGrade">Grade</label>
+              <input type="text" id="matGrade" placeholder="e.g. Grade 12" required />
+            </div>
+            <div>
+              <label for="matSubject">Subject</label>
+              <input type="text" id="matSubject" placeholder="e.g. Physical Sciences" required />
+            </div>
+            <div>
+              <label for="matCurriculum">Curriculum</label>
+              <input type="text" id="matCurriculum" placeholder="e.g. CAPS or IEB" value="CAPS" required />
+            </div>
+            <div>
+              <label for="matType">Resource Type &amp; Title</label>
+              <input type="text" id="matType" placeholder="e.g. Past Paper — Vertical Projectile Motion" required />
+            </div>
+            <div>
+              <label for="matLink">Google Drive Share Link</label>
+              <input type="url" id="matLink" placeholder="https://drive.google.com/file/d/..." required />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Upload to Study Materials</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- RECORD CAPS MARK -->
+        <div class="card">
+          <h3>Record Student Assessment Mark</h3>
+          <form id="markForm" class="form-grid">
+            <div>
+              <label for="markStudentSelect">Student</label>
+              <select id="markStudentSelect" required>
+                <option value="">Select student...</option>
+              </select>
+            </div>
+            <div>
+              <label for="markSubject">Subject</label>
+              <input type="text" id="markSubject" placeholder="e.g. Pure Mathematics" required />
+            </div>
+            <div>
+              <label for="markFormat">Assessment Format</label>
+              <input type="text" id="markFormat" placeholder="e.g. Test / Quiz / Exam" value="Test" required />
+            </div>
+            <div>
+              <label for="markTitle">Assessment Title</label>
+              <input type="text" id="markTitle" placeholder="e.g. Sequences & Series Test 1" required />
+            </div>
+            <div>
+              <label for="markObtained">Mark Obtained</label>
+              <input type="number" id="markObtained" step="0.5" placeholder="e.g. 42" required />
+            </div>
+            <div>
+              <label for="markTotal">Total Mark</label>
+              <input type="number" id="markTotal" step="0.5" placeholder="e.g. 50" required />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Save Mark &amp; Calculate CAPS Level</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- POST ANNOUNCEMENT -->
+        <div class="card">
+          <h3>Post Academy Announcement</h3>
+          <form id="announcementForm" class="form-grid">
+            <div>
+              <label for="annTarget">Target Audience / Group Code</label>
+              <input type="text" id="annTarget" placeholder="ALL or MATH12-CAPS-MA-G01" value="ALL" required />
+            </div>
+            <div>
+              <label for="annSubject">Subject / Headline</label>
+              <input type="text" id="annSubject" placeholder="e.g. Saturday Revision Session" required />
+            </div>
+            <div>
+              <label for="annMessage">Announcement Text</label>
+              <input type="text" id="annMessage" placeholder="Write announcement..." required />
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Publish Announcement</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TUTOR STUDENT FINDER -->
+        <div class="card">
+          <h3>Student Directory Finder</h3>
+          <div style="display:flex; gap:8px; margin-bottom:14px;">
+            <input type="text" id="tutorSearchInput" class="search-input" style="margin-bottom:0;" placeholder="Search by Student ID, Name, Grade, Subject, or Group Code..." onkeyup="if(event.key==='Enter') filterTutorDirectory()">
+            <button type="button" class="btn btn-primary" onclick="filterTutorDirectory()">Search</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Full Name</th>
+                  <th>Grade &amp; Curriculum</th>
+                  <th>Subject</th>
+                  <th>Group Code</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tutorDirectoryBody">
+                <tr><td colspan="6" class="muted">No students found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. EXECUTIVE FINANCE & ADMIN -->
+      <section id="tabAdmin" class="view-section hidden">
+        <div class="page-header">
+          <div>
+            <h2>Executive Finance &amp; Admin Control</h2>
+            <p class="muted">Live revenue from Billing_Ledger, Tutor Payroll, Expenses, and full Student/Tutor Directory.</p>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Collected Revenue</span>
+            <strong id="finCollected" class="kpi-value">R 0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Outstanding / Overdue</span>
+            <strong id="finOutstanding" class="kpi-value">R 0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Payroll + Expenses</span>
+            <strong id="finOutflow" class="kpi-value">R 0</strong>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Net Profit</span>
+            <strong id="finProfit" class="kpi-value">R 0</strong>
+          </div>
+        </div>
+
+        <!-- BILLING LEDGER -->
+        <div class="card">
+          <h3>Student Billing Ledger</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice ID</th>
+                  <th>Month</th>
+                  <th>Student</th>
+                  <th>Due / Paid</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="billingTableBody">
+                <tr><td colspan="7" class="muted">No billing records found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FULL STUDENT & TUTOR FINDER -->
+        <div class="card">
+          <h3>Academy Student &amp; Tutor Directory Search</h3>
+          <div style="display:flex; gap:8px; margin-bottom:14px;">
+            <input type="text" id="studentSearchInput" placeholder="Search by Student ID (e.g. VPA-STU-260001) or Name..." onkeyup="if(event.key==='Enter') filterStudentDirectory()">
+            <button class="btn" onclick="filterStudentDirectory()">Search</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Role &amp; ID</th>
+                  <th>Full Name</th>
+                  <th>Grade / Subjects</th>
+                  <th>Group Code</th>
+                  <th>Package / Contact</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminDirectoryBody">
+                <tr><td colspan="6" class="muted">Loading directory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
